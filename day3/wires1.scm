@@ -11,12 +11,13 @@
     (list (string-take direction 1) (string->number (string-drop direction 1))))
 
 (define (move start direction num)
-    (define-values (x y) (apply values start))
-    (define new-pos (match direction
-                           ["U" (list x (+ y 1))]
-                           ["D" (list x (- y 1))]
-                           ["L" (list (- x 1) y)]
-                           ["R" (list (+ x 1) y)]))
+    (define-values (steps pos) (apply values start))
+    (define-values (x y) (apply values pos))
+    (define new-pos (list (+ steps 1) (match direction
+                                            ["U" (list x (+ y 1))]
+                                            ["D" (list x (- y 1))]
+                                            ["L" (list (- x 1) y)]
+                                            ["R" (list (+ x 1) y)])))
     (define new-num (- num 1))
     (if (= new-num 0)
         (list new-pos)
@@ -33,23 +34,26 @@
 
 (define input (read-string #f (open-input-file "input")))
 (define input (map (lambda (input) (string-split input ",")) (string-split input "\n")))
-(define first-plot (plot '(0 0) (first input)))
-(define second-plot (plot '(0 0) (second input)))
-#;(printf "~a\n" first-plot)
-#;(printf "~a\n"  second-plot)
+(define first-plot (plot '(0 (0 0)) (first input)))
+(define second-plot (plot '(0 (0 0)) (second input)))
 (define (compare-list a b)
     (define (lexicographic x)
         (if (null? x)
             #f
             (or (apply < (car x)) (and (apply = (car x)) (lexicographic (cdr x))))))
     (lexicographic (zip a b)))
-(define (sort-plot plot) (sort (map (lambda (i) (cons (apply + (map abs i)) i)) plot) compare-list))
-(define first-distances (sort-plot first-plot))
-(define second-distances (sort-plot second-plot))
+(define (sort-plot plot) (sort plot (lambda (x y) (compare-list (second x) (second y)))))
+(define first-plot (sort-plot first-plot))
+(define second-plot (sort-plot second-plot))
 (define (find-common a b)
-    (if (equal? (car a) (car b))
-        (car a)
-        (if (compare-list (car a) (car b))
-            (find-common (cdr a) b)
-            (find-common a (cdr b)))))
-(printf "1: ~a\n" (first (find-common first-distances second-distances)))
+    (if (or (null? a) (null? b))
+        '()
+        (let ((aa (second (car a)))
+              (bb (second (car b))))
+           (if (equal? aa bb)
+               (cons (+ (car (car a)) (car (car b))) (find-common (cdr a) (cdr b)))
+               (if (compare-list aa bb)
+                   (find-common (cdr a) b)
+                   (find-common a (cdr b)))))))
+(define intersections (find-common first-plot second-plot))
+(printf "1: ~a\n" (car (sort intersections <)))
