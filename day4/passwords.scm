@@ -12,14 +12,15 @@
 (define (adjacent pass last-matched)
     (if (<= (length pass) 1)
         #f
-        (or 
-         (and
-          (= (car pass) (car (cdr pass)))
-          (if (>= (length pass) 3)
-            (not (= (car (cdr pass)) (car (cdr (cdr pass)))))
-            #t)
-          (not last-matched))
-         (adjacent (cdr pass) (= (car pass) (car (cdr pass)))))))
+        (let ((match (= (car pass) (car (cdr pass))))) 
+            (or
+             (and
+              match
+              (if (>= (length pass) 3)
+                (not (= (car (cdr pass)) (car (cdr (cdr pass)))))
+                #t)
+              (not last-matched))
+             (adjacent (cdr pass) match)))))
 
 (define (never-decrease pass)
     (if (<= (length pass) 1)
