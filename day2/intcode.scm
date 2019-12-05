@@ -14,10 +14,10 @@
 (define (computer ip memory) 
     (define (update-memory op par1 par2 dest memory)
         (insert (op (list-ref memory par1) (list-ref memory par2)) dest memory))
-    (match (take (drop memory ip) 5)
-        [(99 _ _ _ _) memory]
-        [(1 par1 par2 dest _) (computer (+ ip 4) (update-memory + par1 par2 dest memory))]
-        [(2 par1 par2 dest _) (computer (+ ip 4) (update-memory * par1 par2 dest memory))]
+    (match (drop memory ip)
+        [(99 . _) memory]
+        [(1 par1 par2 dest . _) (computer (+ ip 4) (update-memory + par1 par2 dest memory))]
+        [(2 par1 par2 dest . _) (computer (+ ip 4) (update-memory * par1 par2 dest memory))]
         [_ "unknown opcode"]))
 
 (define (compute noun verb input)
