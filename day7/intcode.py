@@ -36,14 +36,11 @@ class Computer:
         ip = 0
         while True:
             opcode, modes = decode_opcode(self.memory[ip])
-            # print(f"{opcode=}")
-            # print(f"{self.memory[ip:ip+5]=}")
             if opcode == 99:
                 return self.memory
             elif opcode == 3 or opcode == 4:
                 par1 = self.memory[ip + 1]
                 if opcode == 3:
-                    # print(f"{self.name} waiting for input")
                     self.memory[par1] = self.inputs.get()
                 else:
                     output = self.memory[par1]

@@ -2,8 +2,6 @@ from intcode import *
 import threading
 
 def output_callback(output, amplifier):
-    # print(f"thread {threading.get_ident()}")
-    # print(f"handing {output} to {amplifier.name}")
     amplifier.inputs.put(output)
 
 def amp(program, phases, inputs):
@@ -25,23 +23,31 @@ def amp(program, phases, inputs):
 def unique(x):
     return len(set(x)) == len(x)
 
-def get_max_output(program):
+def phases_generator(num_phases, ranges):
+    low, high = ranges
+    if num_phases > 0:
+        for x in range(low, high):
+            for y in phases_generator(num_phases -1, ranges):
+                y = list(y)
+                y.append(x)
+                yield y
+    else:
+        yield []
+
+
+def get_max_output(program, ranges, num_phases=5):
     max = 0
     max_phases = []
-    for phase0 in range(5,10):
-        for phase1 in range(5,10):
-            for phase2 in range(5,10):
-                for phase3 in range(5,10):
-                    for phase4 in range(5,10):
-                        phases = [phase0, phase1, phase2, phase3, phase4]
-                        if unique(phases):
-                            outputs = amp(program, phases, [0])
-                            if outputs[0] > max:
-                                max = outputs[0]
-                                max_phases = phases
+    for phases in phases_generator(num_phases, ranges):
+        if unique(phases):
+            outputs = amp(program, phases, [0])
+            if outputs[0] > max:
+                max = outputs[0]
+                max_phases = phases
     return (max, max_phases)
 
 with open('input', 'r') as f:
     input_string = f.read()
 program = convert(input_string)
-print(get_max_output(program))
+print("1: " + str(get_max_output(program, (0,5))[0]))
+print("2: " + str(get_max_output(program, (5,10))[0]))
