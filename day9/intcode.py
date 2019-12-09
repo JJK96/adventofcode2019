@@ -99,5 +99,11 @@ if __name__ == "__main__":
         input_string = f.read()
     input = convert(input_string)
 
-    computer = Computer(input, [2])
+    output = []
+    computer = Computer(input, [1], output_callback=lambda x, output=output: output.append(x))
     computer.run()
+    print(f"1. {output[0]}")
+    output = []
+    computer = Computer(input, [2], output_callback=lambda x, output=output: output.append(x))
+    computer.run()
+    print(f"2. {output[0]}")
