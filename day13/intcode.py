@@ -1,5 +1,4 @@
 import copy
-import queue
 import threading
 
 def decode_opcode(opcode):
@@ -7,11 +6,9 @@ def decode_opcode(opcode):
 
 
 class Computer:
-    def __init__(self, program, inputs=[], output_callback=(lambda x: print(x)), name=None):
-        self.inputs = queue.Queue()
-        for i in inputs:
-            self.inputs.put(i)
+    def __init__(self, program, input_callback, output_callback=(lambda x: print(x)), name=None):
         self.outputs = []
+        self.input_callback = input_callback
         self.memory = copy.copy(program)
         self.memory += [0]*2**20
         self.output_callback = output_callback
@@ -30,7 +27,7 @@ class Computer:
                 return self.memory
             if opcode == 3:
                 par1 = self.get_values(self.memory[ip + 1:ip + 2], modes)[1][0]
-                self.memory[par1] = self.inputs.get()
+                self.memory[par1] = self.input_callback()
                 ip += 2
                 continue
             par1 = self.get_values(self.memory[ip + 1:ip + 2], modes)[0][0]
