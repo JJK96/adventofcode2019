@@ -1,22 +1,24 @@
 import intcode
 import os
 import time
-
-HUMAN_INPUT = False
+import numpy as np
 
 class Arcade:
-    def __init__(self, input, screen_size):
+    def __init__(self, input, screen_size, add_quarters=True, human_input=False, do_print=True):
+        self.human_input = human_input
+        self.do_print = do_print
         self.outputs = []
         x, y = screen_size
         self.screen = [[' ' for _ in range(x)] for _ in range(y)]
-        input[0] = 2
+        if add_quarters:
+            input[0] = 2
         output_callback=lambda output, self=self: self.handle_output(output)
         input_callback=self.get_input
         self.computer = intcode.Computer(input, input_callback, output_callback=output_callback)
         self.score = 0
 
     def get_input(self):
-        if HUMAN_INPUT:
+        if self.human_input:
             line = input()
             if len(line) == 0:
                 return 0
@@ -26,9 +28,10 @@ class Arcade:
             elif char == 'r':
                 return 1
         else:
+            if self.do_print:
+                time.sleep(0.05)
             x, y = self.ball
             xp, yp = self.paddle
-            time.sleep(0.005)
             if x > xp:
                 return 1
             elif x == xp:
@@ -72,18 +75,27 @@ class Arcade:
             print(id)
 
     def draw(self):
-        os.system('clear')
-        print(self.score)
-        string = ""
-        for line in self.screen:
-            for char in line:
-                string += char
-            string += "\n"
-        print(string)
+        if self.do_print:
+            os.system('clear')
+            print(self.score)
+            string = ""
+            for line in self.screen:
+                for char in line:
+                    string += char
+                string += "\n"
+            print(string)
 
 with open('input','r') as f:
     input_string = f.read()
 
+size = (43,22)
 program = intcode.convert(input_string)
-arcade = Arcade(program, (43,22))
+arcade = Arcade(program, size, add_quarters=False, do_print=False)
 arcade.start()
+arcade.computer.thread.join()
+block_tiles = len([x for x in np.array(arcade.screen).flatten() if x == '#'])
+print(f"1. {block_tiles}")
+arcade = Arcade(program, size, do_print=False)
+arcade.start()
+arcade.computer.thread.join()
+print(f"2. {arcade.score}")
