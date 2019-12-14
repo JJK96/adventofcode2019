@@ -10,7 +10,7 @@ def parse_input(input):
         ins, out = line.split('=>')
         amount, out = parse_chemical(out.strip())
         ins = [parse_chemical(x.strip()) for x in ins.split(', ')]
-        assert reactions.get(out) == None, "not unique"
+        assert reactions.get(out) is None, "not unique"
         reactions[out] = (amount, ins)
     return reactions
 
@@ -40,12 +40,22 @@ def required_ore(reactions, chemical, needed):
         total += required_ore(reactions, chem, amount*times)
     return total
 
+def max_fuel(ore):
+    amount = ore//required
+    step = amount
+    while step != 0:
+        ore_required = required_ore(reactions, 'FUEL', amount+step)
+        if ore_required > ore:
+            step //= 2
+        else:
+            amount += step
+    return amount
+
 with open('input') as f:
     input=f.read()[:-1]
 
 reactions = parse_input(input)
 required = required_ore(reactions, 'FUEL', 1)
 print("1. " + str(required))
-max_fuel = 10**12//required
-rest = 10**12 % required
-print(max_fuel, rest)
+ore = 10**12
+print("2. " + str(max_fuel(ore)))
