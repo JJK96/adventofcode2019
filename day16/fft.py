@@ -21,8 +21,8 @@ def fft(input, phases):
         input = new_input
     return input
 
+patterns = {}
 def recursive_fft(input, phases, indexes):
-    print(f"{phases=}")
     if phases == 0:
         output = {}
         for i in indexes:
@@ -30,20 +30,21 @@ def recursive_fft(input, phases, indexes):
         return output
     pattern = [0, 1, 0, -1]
     new_indexes = set()
-    patterns = {}
     for i in indexes:
-        pattern_row = []
-        for j in range(i, len(input)):
-            pattern_index = ((j+1)//(i+1)) % len(pattern)
-            if pattern[pattern_index] != 0:
-                new_indexes.add(j)
-                pattern_row.append((j, pattern[pattern_index]))
-        patterns[i] = pattern_row
+        pattern_row = patterns.get(i, {})
+        if len(pattern_row) == 0:
+            for j in range(i, len(input)):
+                pattern_index = ((j+1)//(i+1)) % len(pattern)
+                pattern_row[j] = pattern[pattern_index]
+            patterns[i] = pattern_row
+        for k in pattern_row.keys():
+            new_indexes.add(k)
     prev_phase = recursive_fft(input, phases - 1, new_indexes)
     output = {}
-    for i, pattern in patterns.items():
+    for i in indexes:
+        pattern = patterns[i]
         val = 0
-        for index, factor in pattern:
+        for index, factor in pattern.items():
             val += prev_phase[index] * factor
         output[i] = int(str(val)[-1])
     return output
@@ -51,7 +52,7 @@ def recursive_fft(input, phases, indexes):
 with open('input') as f:
     input = f.read()[:-1]
 
-input = "19617804207202209144916044189917"
+# input = "19617804207202209144916044189917"
 # to_skip = int(input[:7])
 # input *= 10000
 # print(res[to_skip:to_skip+8])
