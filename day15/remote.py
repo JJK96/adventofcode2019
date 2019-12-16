@@ -11,10 +11,11 @@ class Droid:
     def __init__(self, program, do_print=False):
         self.do_print = do_print
         self.pos = (0, 0)
+        self.moves = 0
         # empty places that the droid can move to
         self.map = {}
         self.map[self.pos] = '.'
-        self.empty_places = set()
+        self.empty_places = []
         self.update_empty_places()
         self.steps = []
         self.dest = None
@@ -97,18 +98,17 @@ class Droid:
             new_pos = self.get_new_pos(direction)
             item = self.map.get(new_pos, ' ')
             if item == ' ':
-                self.empty_places.add(new_pos)
+                self.empty_places.append(new_pos)
 
     def get_input(self):
-        try:
-            if not self.dest:
-                self.dest = next(iter(self.empty_places))
-                steps = self.get_steps(self.dest)
-                self.steps = steps
-            return self.steps[0]
-        except:
-            # done
-            pass
+        if not self.dest:
+            self.update_empty_places()
+            if len(self.empty_places) == 0:
+                return
+            self.dest = self.empty_places[-1]
+            steps = self.get_steps(self.dest)
+            self.steps = steps
+        return self.steps[0]
 
     def output_to_char(self, output):
         if output == 0:
@@ -119,10 +119,11 @@ class Droid:
             return '!'
 
     def output_handler(self, output):
+        self.moves += 1
         new_pos = self.get_new_pos(self.steps[0])
         self.steps = self.steps[1:]
         if new_pos == self.dest:
-            self.empty_places.remove(new_pos)
+            self.empty_places = [x for x in self.empty_places if x != self.dest]
             self.dest = None
             if self.do_print:
                 print(self.draw_map())
@@ -132,7 +133,6 @@ class Droid:
             self.pos = new_pos
             if output == '!':
                 self.oxygen_system = new_pos
-            self.update_empty_places()
 
     def spread_oxygen(self):
         time = 0
