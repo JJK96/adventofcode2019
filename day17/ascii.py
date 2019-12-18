@@ -7,27 +7,11 @@ with open('input') as f:
 
 program = convert(input_string)
 
-def remove_substring(route, substring, substring_name):
-    new_route = []
-    previous = 0
-    i = 0
-    while i < len(route):
-        route_part = route[i:i+len(substring)]
-        if route_part == substring:
-            new_route.append(substring_name)
-            i += len(substring)
-        else:
-            new_route.append(route[i])
-            i += 1
-    return new_route
-
 def split_route(route, substrings={}, route_names = ['A', 'B' ,'C']):
     if route == []:
         return substrings, route
-    # print(substrings, route)
     for i in range(min(len(route), 10), 0, -1):
         substring = route[:i]
-        # print(substring)
         for name, substring1 in substrings.items():
             if substring == substring1:
                 res = split_route(route[i:], substrings, route_names)
@@ -41,18 +25,6 @@ def split_route(route, substrings={}, route_names = ['A', 'B' ,'C']):
             if res is not None:
                 return res
     return None
-
-def split_counts(route):
-    new_route = []
-    split_by = 8
-    for x in route:
-        if type(x) == int:
-            new_route += [split_by]*(x//split_by)
-            if x % split_by != 0:
-                new_route.append(x % split_by)
-        else:
-            new_route.append(x)
-    return new_route
 
 class Vacuum:
     def __init__(self, program, video=True):
@@ -91,7 +63,6 @@ class Vacuum:
 
     def list_to_input(self, l):
         string = ','.join([str(x) for x in l])
-        # print(f"{string=}, {len(string)=}")
         string += '\n'
         return [ord(x) for x in string]
 
@@ -178,7 +149,6 @@ class Vacuum:
 
     def get_route(self):
         x, y = self.vacuum
-        # print(f"{x=}, {y=}")
         direction = self.direction
         route = []
         found_scaffolding = True
@@ -189,7 +159,6 @@ class Vacuum:
                 found_scaffolding = self.is_scaffolding(next_x, next_y)
                 if found_scaffolding:
                     turn = self.turn_to_char(turn)
-                    # print(f"{next_x=}, {next_y=}, {new_direction=}, {turn=}")
                     route.append(turn)
                     x = next_x
                     y = next_y
@@ -197,7 +166,6 @@ class Vacuum:
                     break
         direction = None
         count = 0
-        # print(route)
         new_route = []
         for x in route:
             if x == 'N':
